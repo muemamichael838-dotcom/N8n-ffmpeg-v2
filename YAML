@@ -3,10 +3,12 @@ services:
     name: n8n-ffmpeg
     runtime: docker
     plan: free
+    region: oregon                    # change if you prefer another region
     dockerfilePath: ./Dockerfile
     dockerContext: .
     healthCheckPath: /healthz
     envVars:
+      # --- Core n8n settings ---
       - key: PORT
         value: "5678"
       - key: N8N_PORT
@@ -16,10 +18,19 @@ services:
       - key: NODE_ENV
         value: production
       - key: GENERIC_TIMEZONE
-        value: Africa/Nairobi   # change to your timezone
+        value: Africa/Nairobi
       - key: TZ
         value: Africa/Nairobi
-      # Database vars will be auto-injected if you use the Blueprint + Postgres
+
+      # --- Important for webhooks & editor ---
+      - key: WEBHOOK_URL
+        value: https://n8n-ffmpeg.onrender.com   # ← change to your actual service URL after first deploy
+      - key: N8N_HOST
+        value: n8n-ffmpeg.onrender.com           # ← without https://
+      - key: N8N_EDITOR_BASE_URL
+        value: https://n8n-ffmpeg.onrender.com   # ← same as WEBHOOK_URL
+
+      # --- Database (Render Postgres via Blueprint) ---
       - key: DB_TYPE
         value: postgresdb
       - fromDatabase:
@@ -42,6 +53,24 @@ services:
           name: n8n-db
           property: database
         key: DB_POSTGRESDB_DATABASE
+
+      # --- Cloudflare R2 (optional – better to use n8n Credentials, but useful for Execute Command / Code nodes) ---
+      - key: R2_ACCESS_KEY_ID
+        sync: false                    # set the value manually in the dashboard
+      - key: R2_SECRET_ACCESS_KEY
+        sync: false
+      - key: R2_ENDPOINT
+        value: https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
+      - key: R2_BUCKET
+        value: n8n-media               # change to your bucket name
+
+      # --- Supabase ---
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
 
 databases:
   - name: n8n-db
