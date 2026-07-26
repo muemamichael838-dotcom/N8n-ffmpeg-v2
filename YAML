@@ -30,38 +30,44 @@ services:
       - key: N8N_EDITOR_BASE_URL
         value: https://n8n-ffmpeg.onrender.com   # ← same as WEBHOOK_URL
 
-      # --- Database (Render Postgres via Blueprint) ---
+      # --- Database (Supabase Postgres) ---
       - key: DB_TYPE
         value: postgresdb
-      - fromDatabase:
-          name: n8n-db
-          property: host
-        key: DB_POSTGRESDB_HOST
-      - fromDatabase:
-          name: n8n-db
-          property: port
-        key: DB_POSTGRESDB_PORT
-      - fromDatabase:
-          name: n8n-db
-          property: user
-        key: DB_POSTGRESDB_USER
-      - fromDatabase:
-          name: n8n-db
-          property: password
-        key: DB_POSTGRESDB_PASSWORD
-      - fromDatabase:
-          name: n8n-db
-          property: database
-        key: DB_POSTGRESDB_DATABASE
+      - key: DB_POSTGRESDB_HOST
+        sync: false                              # set from Supabase (db.xxxxx.supabase.co or pooler host)
+      - key: DB_POSTGRESDB_PORT
+        sync: false                              # usually 5432 (direct) or 6543 (pooler)
+      - key: DB_POSTGRESDB_USER
+        sync: false                              # usually postgres (or postgres.project-ref for pooler)
+      - key: DB_POSTGRESDB_PASSWORD
+        sync: false                              # your Supabase database password
+      - key: DB_POSTGRESDB_DATABASE
+        sync: false                              # usually postgres
+      - key: DB_POSTGRESDB_SSL_ENABLED
+        value: "true"
+      # Optional but often needed with Supabase:
+      # - key: DB_POSTGRESDB_SSL_REJECT_UNAUTHORIZED
+      #   value: "false"                         # only if you hit certificate issues
 
       # --- Cloudflare R2 (optional – better to use n8n Credentials, but useful for Execute Command / Code nodes) ---
       - key: R2_ACCESS_KEY_ID
-        sync: false                    # set the value manually in the dashboard
+        sync: false
       - key: R2_SECRET_ACCESS_KEY
         sync: false
       - key: R2_ENDPOINT
         value: https://YOUR_ACCOUNT_ID.r2.cloudflarestorage.com
       - key: R2_BUCKET
+        value: n8n-media
+
+      # --- Supabase (API keys – still useful for nodes / Code) ---
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: SUPABASE_ANON_KEY
+        sync: false
+
+# No more databases: section – we are using external Supabase Postgres      - key: R2_BUCKET
         value: n8n-media               # change to your bucket name
 
       # --- Supabase ---
